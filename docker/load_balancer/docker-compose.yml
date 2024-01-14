@@ -1,0 +1,11 @@
+version: "3.8"
+
+services:
+  fastapi-app:
+    image: fastapi-app:latest
+    deploy:
+      replicas: 4
+      restart_policy:
+        condition: on-failure
+    ports:
+      - "80:80000"
