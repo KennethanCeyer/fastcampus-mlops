@@ -1,4 +1,4 @@
-FROM python:3.11
+FROM --platform=linux/amd64 python:3.11
 WORKDIR /code
 
 ENV CONF_HOST 0.0.0.0
