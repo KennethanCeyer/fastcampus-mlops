@@ -1,0 +1,29 @@
+version: "3.8"
+services:
+  mysql:
+    image: mysql:8.2
+    volumes:
+      - mysql-data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: fast_campus123%
+      MYSQL_DATABASE: fast_campus
+      MYSQL_USER: fast_campus
+      MYSQL_PASSWORD: fast_campus123%
+    ports:
+      - "3306:3306"
+
+  fastapi-app:
+    image: kennethan/fastapi-app:1.0.0-mysql
+    ports:
+      - "8000:8000"
+    environment:
+      CONF_DATABASE_HOSTNAME: mysql
+      CONF_DATABASE_PORT: 3306
+      CONF_DATABASE_NAME: fast_campus
+      CONF_DATABASE_USER: fast_campus
+      CONF_DATABASE_PASSWORD: fast_campus123%
+    depends_on:
+      - mysql
+
+volumes:
+  mysql-data:
