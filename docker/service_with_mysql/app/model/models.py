@@ -11,7 +11,7 @@ class User(Base):
     email = Column(String(255), unique=True, index=True)
 
 
-class UserCreate(Base.Model):
+class UserCreate(BaseModel):
     name: str
     email: str
 
