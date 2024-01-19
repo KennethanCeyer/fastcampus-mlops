@@ -1,25 +1,25 @@
 version: "3.8"
 services:
   fastapi-app1:
-    image: kennethan/fastapi-app:1.0.0-lb
+    image: kennethan/fastapi-app:1.0.0-custom-lb
     expose:
       - 8000
     environment:
-      - APP_NAME=app1
+      - CONF_APP_NAME=app1
 
   fastapi-app2:
-    image: kennethan/fastapi-app:1.0.0-lb
+    image: kennethan/fastapi-app:1.0.0-custom-lb
     expose:
       - 8000
     environment:
-      - APP_NAME=app2
+      - CONF_APP_NAME=app2
 
   fastapi-app3:
-    image: kennethan/fastapi-app:1.0.0-lb
+    image: kennethan/fastapi-app:1.0.0-custom-lb
     expose:
       - 8000
     environment:
-      - APP_NAME=app3
+      - CONF_APP_NAME=app3
 
   nginx:
     image: nginx:latest

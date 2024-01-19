@@ -15,9 +15,7 @@ connect_url = URL.create(
     database=settings.conf_database_name,
 )
 
-DATABASE_URL = "mysql+pymysql://fast_campus:fast_campus123%@mysql/fast_campus"
-
-engine = create_engine(DATABASE_URL)
+engine = create_engine(connect_url)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()

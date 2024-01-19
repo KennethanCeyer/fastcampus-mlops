@@ -1,5 +1,4 @@
-from typing import List
-from app.model.models import User, UserCreate, UserOut
+from model.models import User, UserCreate, UserOut
 from fastapi import FastAPI, Depends, HTTPException
 
 from model.base import SessionLocal, engine
@@ -9,7 +8,7 @@ from model.base import Base
 app = FastAPI()
 
 
-def get_db():
+def get_db() -> SessionLocal:
     db = SessionLocal()
     try:
         yield db
@@ -18,7 +17,7 @@ def get_db():
 
 
 @app.post("/users/", response_model=UserOut)
-def create_user(user: UserCreate, db: SessionLocal = Depends(get_db)):
+def create_user(user: UserCreate, db: SessionLocal = Depends(get_db)) -> UserOut:
     db_user = User(name=user.name, email=user.email)
     db.add(db_user)
     db.commit()
@@ -26,14 +25,16 @@ def create_user(user: UserCreate, db: SessionLocal = Depends(get_db)):
     return db_user
 
 
-@app.get("/users/", response_model=List[UserOut])
-def read_users(skip: int = 0, limit: int = 10, db: SessionLocal = Depends(get_db)):
+@app.get("/users/", response_model=list[UserOut])
+def read_users(
+    skip: int = 0, limit: int = 10, db: SessionLocal = Depends(get_db)
+) -> list[UserOut]:
     users = db.query(User).offset(skip).limit(limit).all()
     return users
 
 
 @app.get("/users/{user_id}", response_model=UserOut)
-def read_user(user_id: int, db: SessionLocal = Depends(get_db)):
+def read_user(user_id: int, db: SessionLocal = Depends(get_db)) -> UserOut:
     user = db.query(User).filter(User.id == user_id).first()
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
@@ -43,7 +44,7 @@ def read_user(user_id: int, db: SessionLocal = Depends(get_db)):
 @app.put("/users/{user_id}", response_model=UserOut)
 def update_user(
     user_id: int, user_update: UserCreate, db: SessionLocal = Depends(get_db)
-):
+) -> UserOut:
     db_user = db.query(User).filter(User.id == user_id).first()
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
@@ -55,16 +56,15 @@ def update_user(
 
 
 @app.delete("/users/{user_id}", status_code=204)
-def delete_user(user_id: int, db: SessionLocal = Depends(get_db)):
+def delete_user(user_id: int, db: SessionLocal = Depends(get_db)) -> None:
     db_user = db.query(User).filter(User.id == user_id).first()
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
     db.delete(db_user)
     db.commit()
-    return {"detail": "User deleted"}
 
 
-if name == "main":
+if __name__ == "__main__":
     import uvicorn
 
     Base.metadata.create_all(bind=engine)
