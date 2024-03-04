@@ -9,7 +9,7 @@ app.include_router(model_router)
 
 @app.get("/")
 async def get_health() -> dict[str, str]:
-    return {"message": "ok"}
+    return {"message": "new version ok"}
 
 
 if __name__ == "__main__":
