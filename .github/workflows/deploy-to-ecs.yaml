@@ -30,7 +30,7 @@ jobs:
         ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
         IMAGE_TAG: ${{ github.sha }}
       run: |
-        docker build -f movie_recommendation_part1/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG movie_recommendation_part1
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
     - name: Fill in the new image ID in the ECS task definition
