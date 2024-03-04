@@ -44,7 +44,7 @@ jobs:
     - name: Deploy Amazon ECS task definition
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
-        service: fast-campus-service
+        service: fast-campus-service-with-alb
         cluster: fast-campus-cluster
         task-definition: ${{ steps.task-def.outputs.task-definition }}
 
