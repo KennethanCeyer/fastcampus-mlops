@@ -6,6 +6,12 @@ from model.router import router as model_router
 app = FastAPI()
 app.include_router(model_router)
 
+
+@app.get("/")
+async def get_health() -> dict[str, str]:
+    return {"message": "ok"}
+
+
 if __name__ == "__main__":
     import uvicorn
 
