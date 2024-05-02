@@ -1,0 +1,71 @@
+version: "3.8"
+services:
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.2.1
+    ports:
+      - "5000:5000"
+    environment:
+      - TZ=UTC
+    command: ["mlflow", "ui", "--host", "0.0.0.0"]
+
+  trainer-image:
+    image: trainer:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: echo "Building trainer image"
+
+  trainer1:
+    image: trainer:latest
+    depends_on:
+      - mlflow
+      - trainer-image
+    environment:
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+      - BATCH_SIZE=64
+      - LEARNING_RATE=0.01
+      - NN_DIM_HIDDEN=128
+
+  trainer2:
+    image: trainer:latest
+    depends_on:
+      - mlflow
+      - trainer-image
+    environment:
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+      - BATCH_SIZE=32
+      - LEARNING_RATE=0.02
+      - NN_DIM_HIDDEN=512
+
+  trainer3:
+    image: trainer:latest
+    depends_on:
+      - mlflow
+      - trainer-image
+    environment:
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+      - BATCH_SIZE=128
+      - LEARNING_RATE=0.005
+      - NN_DIM_HIDDEN=64
+
+  trainer4:
+    image: trainer:latest
+    depends_on:
+      - mlflow
+      - trainer-image
+    environment:
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+      - BATCH_SIZE=128
+      - LEARNING_RATE=0.5
+      - NN_DIM_HIDDEN=256
+
+  trainer5:
+    image: trainer:latest
+    depends_on:
+      - mlflow
+      - trainer-image
+    environment:
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+      - BATCH_SIZE=16
+      - LEARNING_RATE=0.05
+      - NN_DIM_HIDDEN=196
