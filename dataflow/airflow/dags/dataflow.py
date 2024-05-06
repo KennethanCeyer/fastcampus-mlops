@@ -20,16 +20,17 @@ def dataflow_example():
         return project_id
 
     @task
-    def start_dataflow_job(project_id: str):
-        print(f"project_id is: {project_id}")
+    def start_dataflow_job(data_gcs_path: str, project_id: str):
         dataflow_job = DataflowCreatePythonJobOperator(
             task_id="start_dataflow_job",
-            py_file="gs://fast_campus_data_pipeline_example/scripts/dataflow_gcs_to_bigquery.py",
+            py_file=f"{data_gcs_path}/scripts/dataflow_gcs_to_bigquery.py",
             options={
-                "input": "gs://fast_campus_data_pipeline_example/sample_data/language.txt",
+                "input": f"{data_gcs_path}/sample_data/language.txt",
                 "output": f"{project_id}:dataflow.languages",
                 "project": project_id,
                 "region": "us-central1",
+                "temp_location": f"{data_gcs_path}/temp",
+                "staging_location": f"{data_gcs_path}/staging",
             },
             py_requirements=["apache-beam"],
             py_interpreter="python3",
@@ -39,8 +40,9 @@ def dataflow_example():
         )
         dataflow_job.execute({})
 
+    data_gcs_path = "gs://fast_campus_data_pipeline"
     project_id = get_gcp_project()
-    start_dataflow_job(project_id)
+    start_dataflow_job(data_gcs_path, project_id)
 
 
 dag_instance = dataflow_example()
