@@ -1,6 +1,6 @@
 from airflow.decorators import dag, task
 from airflow.utils.dates import days_ago
-from airflow.providers.google.cloud.hooks.base import GoogleBaseHook
+from airflow.providers.google.common.hooks.base_google import GoogleBaseHook
 from airflow.providers.google.cloud.operators.dataflow import (
     DataflowCreatePythonJobOperator,
 )
@@ -21,6 +21,7 @@ def dataflow_example():
 
     @task
     def start_dataflow_job(project_id: str):
+        print(f"project_id is: {project_id}")
         dataflow_job = DataflowCreatePythonJobOperator(
             task_id="start_dataflow_job",
             py_file="gs://fast_campus_data_pipeline_example/scripts/dataflow_gcs_to_bigquery.py",
@@ -30,7 +31,7 @@ def dataflow_example():
                 "project": project_id,
                 "region": "us-central1",
             },
-            py_requirements=["apache-beam[gcp]==2.47.0"],
+            py_requirements=["apache-beam"],
             py_interpreter="python3",
             py_system_site_packages=False,
             job_name="start_dataflow_job",
@@ -41,9 +42,5 @@ def dataflow_example():
     project_id = get_gcp_project()
     start_dataflow_job(project_id)
 
-    project_id = get_gcp_project()
-    start_dataflow_job(project_id)
-
 
 dag_instance = dataflow_example()
-
