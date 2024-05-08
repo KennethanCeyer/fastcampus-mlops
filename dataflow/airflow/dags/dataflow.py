@@ -24,23 +24,22 @@ def dataflow_example():
         dataflow_job = DataflowCreatePythonJobOperator(
             task_id="start_dataflow_job",
             py_file=f"{data_gcs_path}/scripts/dataflow_gcs_to_bigquery.py",
+            location="us-west3",
             options={
-                "input": f"{data_gcs_path}/sample_data/language.txt",
-                "output": f"{project_id}:dataflow.languages",
+                "input": f"{data_gcs_path}/sample_data/",
+                "output": f"{project_id}:dataflow.netflix_prize_data",
                 "project": project_id,
-                "region": "us-central1",
                 "temp_location": f"{data_gcs_path}/temp",
                 "staging_location": f"{data_gcs_path}/staging",
             },
-            py_requirements=["apache-beam"],
+            py_requirements=["apache-beam[gcp]", "pandas"],
             py_interpreter="python3",
             py_system_site_packages=False,
             job_name="start_dataflow_job",
-            location="us-central1",
         )
         dataflow_job.execute({})
 
-    data_gcs_path = "gs://fast_campus_data_pipeline"
+    data_gcs_path = "gs://fast_campus_data_pipeline_example"
     project_id = get_gcp_project()
     start_dataflow_job(data_gcs_path, project_id)
 
