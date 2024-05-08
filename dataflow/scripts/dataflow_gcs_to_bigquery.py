@@ -15,21 +15,24 @@ class JobPipelineOptions(PipelineOptions):
         )
 
 
-def parse_netflix_data(element, movie_id=[None]):
-    try:
-        if ":" in element:
-            movie_id[0] = element.split(":")[0]
-        else:
-            user_id, rating, date = element.split(",")
-            return {
-                "Movie_Id": movie_id[0],
-                "User_Id": user_id,
-                "Rating": rating,
-                "Date": date,
-            }
-    except:
-        pass
-    return None
+def parse_netflix_data(element, movie_id=None):
+    if ":" in element:
+        movie_id = element.split(":")[0]
+        return None
+
+    parts = element.split(",")
+    if len(parts) != 3:
+        return None
+    if movie_id is None:
+        return None
+    user_id, rating, date = parts
+
+    return {
+        "Movie_Id": movie_id,
+        "User_Id": user_id.strip(),
+        "Rating": rating.strip(),
+        "Date": date.strip(),
+    }
 
 
 def run():
@@ -37,7 +40,9 @@ def run():
     job_options = pipeline_options.view_as(JobPipelineOptions)
 
     with beam.Pipeline(options=pipeline_options) as p:
-        lines = p | "Read TXT Files" >> ReadFromText(job_options.input.get() + "*.txt")
+        lines = p | "Read TXT Files" >> ReadFromText(
+            job_options.input.get() + "combined_data*.txt"
+        )
         parsed_data = lines | "Parse Netflix Data" >> beam.FlatMap(parse_netflix_data)
         valid_data = parsed_data | "Filter None" >> beam.Filter(lambda x: x is not None)
         _ = valid_data | "Write to BigQuery" >> WriteToBigQuery(
