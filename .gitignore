@@ -1,6 +1,12 @@
 # Mac .DS_Store
 .DS_Store
 
+# Model files
+raw/
+
+# gz
+*.gz
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
