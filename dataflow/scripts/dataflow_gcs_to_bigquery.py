@@ -15,24 +15,28 @@ class JobPipelineOptions(PipelineOptions):
         )
 
 
-def parse_netflix_data(element, movie_id=None):
-    if ":" in element:
-        movie_id = element.split(":")[0]
-        return None
+class ParseNetflixDataFn(beam.DoFn):
+    def __init__(self):
+        self.movie_id = None
 
-    parts = element.split(",")
-    if len(parts) != 3:
-        return None
-    if movie_id is None:
-        return None
-    user_id, rating, date = parts
-
-    return {
-        "Movie_Id": movie_id,
-        "User_Id": user_id.strip(),
-        "Rating": rating.strip(),
-        "Date": date.strip(),
-    }
+    def process(self, element):
+        if ":" in element:
+            self.movie_id = element.split(":")[0]
+            return
+        parts = element.split(",")
+        if len(parts) != 3:
+            return
+        if self.movie_id is None:
+            return
+        user_id, rating, date = parts
+        return [
+            {
+                "Movie_Id": self.movie_id,
+                "User_Id": user_id.strip(),
+                "Rating": rating.strip(),
+                "Date": date.strip(),
+            }
+        ]
 
 
 def run():
@@ -43,7 +47,7 @@ def run():
         lines = p | "Read TXT Files" >> ReadFromText(
             job_options.input.get() + "combined_data*.txt"
         )
-        parsed_data = lines | "Parse Netflix Data" >> beam.FlatMap(parse_netflix_data)
+        parsed_data = lines | "Parse Netflix Data" >> beam.ParDo(ParseNetflixDataFn())
         valid_data = parsed_data | "Filter None" >> beam.Filter(lambda x: x is not None)
         _ = valid_data | "Write to BigQuery" >> WriteToBigQuery(
             job_options.output.get(),
