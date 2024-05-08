@@ -5,6 +5,7 @@ from torchvision import datasets, transforms
 import mlflow.pytorch
 from pydantic_settings import BaseSettings
 from mlflow.client import MlflowClient
+from mlflow.models import infer_signature
 
 
 class Settings(BaseSettings):
@@ -62,11 +63,25 @@ if __name__ == "__main__":
     with mlflow.start_run() as run:
         mlflow.log_params(vars(settings))
         train()
-        mlflow.pytorch.log_model(model, "model")
+
+        train_loader = torch.utils.data.DataLoader(
+            datasets.MNIST(
+                ".", train=True, download=True, transform=transforms.ToTensor()
+            ),
+            batch_size=settings.batch_size,
+            shuffle=True,
+        )
+        data, target = next(iter(train_loader))
+        signature_input = data[0].detach().numpy()
+        signature_output = model(data[0]).detach().numpy()
+        signature = infer_signature(signature_input, signature_output)
+        mlflow.pytorch.log_model(model, "model", signature=signature)
 
         logged_model = f"runs:/{run.info.run_id}/model"
         loaded_model = mlflow.pyfunc.load_model(logged_model)
-        predicted_value = loaded_model.predict(np.random.uniform(size=[1, 28, 28]).astype(np.float32))
+        predicted_value = loaded_model.predict(
+            np.random.uniform(size=[1, 28, 28]).astype(np.float32)
+        )
         print(f"{predicted_value=}")
 
         name = "model"
@@ -74,6 +89,9 @@ if __name__ == "__main__":
         desc = "Initial model deployment"
 
         client = MlflowClient()
+        client.create_registered_model(name)
         client.create_model_version(name, model_uri, run.info.run_id, description=desc)
-        version = client.search_model_versions("run_id='{}'".format(run.info.run_id))[0].version
+        version = client.search_model_versions("run_id='{}'".format(run.info.run_id))[
+            0
+        ].version
         client.transition_model_version_stage(name, version, "Production")
