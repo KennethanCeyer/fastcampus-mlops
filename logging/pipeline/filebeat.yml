@@ -1,0 +1,14 @@
+filebeat.inputs:
+  - type: log
+    enabled: true
+    paths:
+      - /usr/share/filebeat/logs1/*.log
+      - /usr/share/filebeat/logs2/*.log
+      - /usr/share/filebeat/logs3/*.log
+      - /usr/share/filebeat/logs4/*.log
+      - /usr/share/filebeat/logs5/*.log
+
+output.logstash:
+  hosts: ["logstash:5044"]
+
+logging.level: debug

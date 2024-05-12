@@ -9,6 +9,7 @@ from add import add
         ((2, 7), 9),
         ((-1, 4), 3),
         ((0, 0), 0),
+        ((1, -2), -2),
     ],
 )
 def test_add(given: tuple[int, int], expected: int):

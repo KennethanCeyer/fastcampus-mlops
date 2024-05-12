@@ -1,0 +1,66 @@
+version: "3.7"
+services:
+  python-app-base: &python-app-base
+    image: python:3.11-slim
+    depends_on:
+      - filebeat
+    command: tail -f /dev/null
+
+  python-app1:
+    <<: *python-app-base
+    volumes:
+      - ./app1:/app
+    working_dir: /app
+    command: python app.py
+
+  python-app2:
+    <<: *python-app-base
+    volumes:
+      - ./app2:/app
+    working_dir: /app
+    command: python app.py
+
+  python-app3:
+    <<: *python-app-base
+    volumes:
+      - ./app3:/app
+    working_dir: /app
+    command: python app.py
+
+  python-app4:
+    <<: *python-app-base
+    volumes:
+      - ./app4:/app
+    working_dir: /app
+    command: python app.py
+
+  python-app5:
+    <<: *python-app-base
+    volumes:
+      - ./app5:/app
+    working_dir: /app
+    command: python app.py
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:8.13.4
+    volumes:
+      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - ./app1/logs:/usr/share/filebeat/logs1
+      - ./app2/logs:/usr/share/filebeat/logs2
+      - ./app3/logs:/usr/share/filebeat/logs3
+      - ./app4/logs:/usr/share/filebeat/logs4
+      - ./app5/logs:/usr/share/filebeat/logs5
+    command: filebeat -e -strict.perms=false
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.13.4
+    volumes:
+      - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+      - ./credential.json:/usr/share/logstash/credential.json
+    ports:
+      - "5044:5044"
+    command: >
+      /bin/bash -c "
+        logstash-plugin install logstash-output-google_pubsub &&
+        /usr/share/logstash/bin/logstash -f /usr/share/logstash/pipeline/logstash.conf
+      "
