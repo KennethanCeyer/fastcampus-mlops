@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: fast-api
-          image: fast-api-example:latest
+          image: kennethan/fast-api-example:latest
           resources:
             limits:
               memory: "256Mi"
