@@ -1,20 +1,27 @@
 import torch
 import torch.nn as nn
+from torch.utils.data import Subset, DataLoader
 from torchvision import datasets, transforms
 from pydantic_settings import BaseSettings
+from tqdm import tqdm
+import numpy as np
 
 
 class Settings(BaseSettings):
-    hyper_params_epochs: int = 5
+    hyper_params_epochs: int = 3
     hyper_params_learning_rate: float = 0.01
     hyper_params_batch: int = 64
 
 
 settings = Settings()
-train_loader = torch.utils.data.DataLoader(
-    datasets.MNIST(".", train=True, download=True, transform=transforms.ToTensor()),
-    batch_size=settings.hyper_params_batch,
-    shuffle=True,
+full_dataset = datasets.MNIST(
+    ".", train=True, download=True, transform=transforms.ToTensor()
+)
+subset_size = int(0.3 * len(full_dataset))
+indices = np.random.choice(len(full_dataset), subset_size, replace=False)
+subset_dataset = Subset(full_dataset, indices)
+train_loader = DataLoader(
+    subset_dataset, batch_size=settings.hyper_params_batch, shuffle=True
 )
 model = nn.Sequential(
     nn.Flatten(),
@@ -29,8 +36,8 @@ optimizer = torch.optim.SGD(model.parameters(), lr=settings.hyper_params_learnin
 def train() -> float:
     model.train()
     total_loss, correct, total = 0, 0, 0
-    for _ in range(settings.hyper_params_epochs):
-        for data, target in train_loader:
+    for _ in tqdm(range(settings.hyper_params_epochs)):
+        for data, target in tqdm(train_loader):
             optimizer.zero_grad()
             outputs = model(data)
             loss = loss_fn(outputs, target)
