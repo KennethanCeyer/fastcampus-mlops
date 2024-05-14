@@ -1,0 +1,69 @@
+apiVersion: kubeflow.org/v1beta1
+kind: Experiment
+metadata:
+  namespace: kubeflow
+  name: pytorch-mnist
+spec:
+  parallelTrialCount: 3
+  maxTrialCount: 12
+  maxFailedTrialCount: 3
+  objective:
+    type: minimize
+    goal: 0.001
+    objectiveMetricName: loss
+  algorithm:
+    algorithmName: random
+  parameters:
+    - name: lr
+      parameterType: double
+      feasibleSpace:
+        min: "0.01"
+        max: "0.05"
+    - name: batch
+      parameterType: int
+      feasibleSpace:
+        min: 1
+        max: 64
+        step: 8
+  trialTemplate:
+    primaryContainerName: pytorch
+    trialParameters:
+      - name: learningRate
+        description: Learning rate for the training model
+        reference: lr
+      - name: batch
+        description: Batch size for the training model
+        reference: batch
+    trialSpec:
+      apiVersion: kubeflow.org/v1
+      kind: PyTorchJob
+      spec:
+        pytorchReplicaSpecs:
+          Worker:
+            replicas: 1
+            restartPolicy: OnFailure
+            template:
+              spec:
+                containers:
+                  - name: pytorch
+                    image: docker.io/kennethan/katib-mnist:latest
+                    env:
+                      - name: HYPER_PARAMS_EPOCHS
+                        value: "10"
+                      - name: HYPER_PARAMS_LEARNING_RATE
+                        value: ${trialParameters.lr}
+                      - name: HYPER_PARAMS_BATCH
+                        value: ${trialParameters.batch}
+                    volumeMounts:
+                      - name: metrics
+                        mountPath: /output
+                volumes:
+                  - name: metrics
+                    emptyDir: {}
+    metricsCollectorSpec:
+      source:
+        fileSystemPath:
+          path: /output/metrics.log
+          kind: File
+      collector:
+        kind: StdOut
