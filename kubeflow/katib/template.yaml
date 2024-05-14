@@ -22,9 +22,9 @@ spec:
     - name: batch
       parameterType: int
       feasibleSpace:
-        min: 1
-        max: 64
-        step: 8
+        min: "1"
+        max: "64"
+        step: "8"
   trialTemplate:
     primaryContainerName: pytorch
     trialParameters:
@@ -51,7 +51,7 @@ spec:
                       - name: HYPER_PARAMS_EPOCHS
                         value: "10"
                       - name: HYPER_PARAMS_LEARNING_RATE
-                        value: ${trialParameters.lr}
+                        value: ${trialParameters.learningRate}
                       - name: HYPER_PARAMS_BATCH
                         value: ${trialParameters.batch}
                     volumeMounts:
