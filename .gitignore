@@ -3,6 +3,8 @@
 
 # Model files
 raw/
+*.pth
+*.mar
 
 # gz
 *.gz

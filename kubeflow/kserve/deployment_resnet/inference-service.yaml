@@ -1,0 +1,17 @@
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  name: pytorch-resnet18
+  namespace: kubeflow-user-example-com
+spec:
+  predictor:
+    serviceAccountName: kserve-storage-access
+    pytorch:
+      storageUri: "gs://fast-campus-kubeflow/models/resnet18/v1/"
+      resources:
+        requests:
+          cpu: 1
+          memory: 1Gi
+        limits:
+          cpu: 1
+          memory: 1Gi
